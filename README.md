@@ -1,8 +1,21 @@
 Rcer，又一个[https://ruby-china.org](https://ruby-china.org)的客户端，也许支持[https://gethomeland.com/](https://gethomeland.com/)
 
-
+开发计划
+* 优化新增话题中选择节点的页面
+* markdown支持table
+* ...
+* IOS端测试、上架
+* 代码重构
+* 发布第一个开源版本
 
 ### 开发日志
+**2019-04-14**
+发布`0.7.0_1`
+* 新增话题后不能关闭的bug
+* 优化token刷新策略
+* 更多视觉方面问题的修复
+
+
 **2019-04-10**  
 发布`0.6.1_1`
 * 修复了个人信息回帖话题详情不能操作的问题
