@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape>
+            <solid android:color="#F5F8FA"/>
+        </shape>
+    </item>
+    
+    <item>
+        <bitmap android:src="@mipmap/ic_launcher_foreground">
+
+        </bitmap>
+    </item>
+</layer-list>

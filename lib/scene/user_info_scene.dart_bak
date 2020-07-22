@@ -1,0 +1,194 @@
+import 'package:flutter/material.dart';
+import 'dart:ui' as ui;
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:rc/model/user_detail.dart';
+
+import 'package:provide/provide.dart';
+import 'package:rc/app_state.dart';
+import 'package:rc/constants.dart';
+import 'package:rc/routes_helper.dart';
+import 'package:rc/widget/refresh_list_view.dart';
+import 'package:rc/service/service.dart';
+import 'package:rc/model/models.dart';
+
+class UserInfoScene extends StatefulWidget {
+  final User user;
+  final bool isSelf;
+
+  UserInfoScene(this.user, this.isSelf);
+
+  @override
+  State<StatefulWidget> createState() {
+    return _UserInfoState();
+  }
+}
+
+class _UserInfoState extends State<UserInfoScene> {
+  final RCService rcService = new RCService();
+  UserDetail _userDetail;
+
+  @override
+  void initState() {
+    super.initState();
+    _userDetail = UserDetail.fromUser(widget.user);
+
+    rcService.getUserDetail(loginId: _userDetail.login).then((res) {
+      if (res.isOk) {
+        setState(() {
+          _userDetail = res.data;
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final AppState appState = Provide.value<AppState>(context);
+
+    return Scaffold(
+      body: NestedScrollView(
+        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+          return <Widget>[
+            SliverOverlapAbsorber(
+                handle:
+                    NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                child: SliverAppBar(
+                  title: Text("基本信息"),
+                  actions: <Widget>[
+                    IconButton(
+                      icon: Icon(Icons.settings),
+                      tooltip: '设置',
+                      onPressed: () {
+                        RoutesHelper.of(context).goSettings();
+                      },
+                    )
+                  ],
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Container(
+                      padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                            fit: BoxFit.fill,
+                            image: CachedNetworkImageProvider(
+                                DEFAULT_USER_AVATAR)),
+                      ),
+                      child: UserSummary(_userDetail),
+                    ),
+                  ),
+                  expandedHeight: 300.0,
+                  pinned: true,
+                )),
+          ];
+        },
+        body: RefreshListView(
+          showFirstLoader: true,
+          onRefresh: () {},
+          child: ListView(
+            children: <Widget>[
+              SizedBox(
+                height: 50.0,
+              ),
+              InkWell(
+                child: ListTile(
+                  leading: Icon(Icons.person),
+                  title: Text('基本信息'),
+                  onTap: () => _onTap(_Item.INFO, null),
+                ),
+              ),
+              ListTile(
+                leading: Icon(Icons.archive),
+                title: Text('话题'),
+              ),
+              ListTile(
+                leading: Icon(Icons.comment),
+                title: Text('回帖'),
+              ),
+              ListTile(
+                leading: Icon(Icons.favorite),
+                title: Text('收藏'),
+              ),
+              ListTile(
+                leading: Icon(Icons.remove_red_eye),
+                title: Text('正在关注'),
+              ),
+              ListTile(
+                leading: Icon(Icons.people),
+                title: Text('关注者'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _onTap(_Item item, UserDetail user) {}
+}
+
+enum _Item { INFO, TOPICS, REPLIES, FAVORITE, FOLLOW, FOLLOWER }
+
+class UserSummary extends StatelessWidget {
+  final UserDetail user;
+  UserSummary(this.user);
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    return Container(
+        child: BackdropFilter(
+      filter: ui.ImageFilter.blur(sigmaX: 30.0, sigmaY: 30.0),
+      child: Container(
+        decoration:
+            BoxDecoration(color: theme.indicatorColor.withOpacity(0.25)),
+        child: Center(
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            GestureDetector(
+              onTapUp: (_) => RoutesHelper.of(context).goLogin(),
+              child: Container(
+                width: 96.0,
+                height: 96.0,
+                decoration: new BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFFECECEC),
+                  image: new DecorationImage(
+                      image: new CachedNetworkImageProvider(
+                          user.avatarUrl == null
+                              ? DEFAULT_USER_AVATAR
+                              : user.avatarUrl),
+                      fit: BoxFit.cover),
+                  border: new Border.all(
+                    color: const Color(0xFFECECEC),
+                    width: 2.0,
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Text(
+                user.login == null ? '点击头像登录' : user.login,
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            Row(
+              children: <Widget>[
+                RaisedButton.icon(
+                    onPressed: null,
+                    icon: Icon(Icons.person),
+                    label: Text('关注')),
+                RaisedButton.icon(
+                    onPressed: null,
+                    icon: Icon(Icons.clear),
+                    label: Text('屏蔽'))
+              ],
+            )
+          ],
+        )),
+      ),
+    ));
+  }
+}

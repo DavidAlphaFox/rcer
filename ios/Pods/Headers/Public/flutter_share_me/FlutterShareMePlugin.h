@@ -1,0 +1,1 @@
+../../../../.symlinks/plugins/flutter_share_me/ios/Classes/FlutterShareMePlugin.h
